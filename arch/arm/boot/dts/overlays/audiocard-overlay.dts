@@ -1,0 +1,57 @@
+// Definitions for SuperAudioBoard
+/dts-v1/;
+/plugin/;
+
+/ {
+	compatible = "brcm,bcm2708";
+
+	fragment@0 {
+		target = <&sound>;
+		__overlay__ {
+			compatible = "audiocard,audiocard";
+			i2s-controller = <&i2s>;
+			status = "okay";
+		};
+	};
+
+	fragment@1 {
+		target = <&i2s>;
+		__overlay__ {
+			status = "okay";
+		};
+	};
+    
+    fragment@2 {
+        target = <&gpio>;
+        __overlay__ {
+            sab_pins: sab_pins {
+                brcm,pins = <26>; /* Pin 26 */
+                brcm,function = <1>; /* Output */
+            };
+        };
+    };
+
+	fragment@3 {
+		target = <&spi0>;
+		__overlay__ {
+			/* needed to avoid dtc warning */
+			#address-cells = <1>;
+			#size-cells = <0>;
+			status = "okay";
+
+			ad913x: ad193x@0{
+				compatible = "analog,ad193x";
+				reg = <0>;
+				status = "okay";
+
+				pinctrl-names = "default";
+				spi-max-frequency = <32000000>;
+			}
+
+		};
+	};
+    __overrides__ {
+        gpiopin = <&cs4271>,"reset-gpio:4",
+                  <&sab_pins>,"brcm,pins:0";
+    };
+};
