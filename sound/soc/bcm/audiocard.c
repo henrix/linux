@@ -1,5 +1,24 @@
+/*
+ * ASoC Driver for AudioCard
+ *
+ * Author:	Henrik Langer <henni19790@googlemail.com>
+ *		Copyright 2015
+ *              based on RaspiDAC3 driver by Jan Grulich <jan@grulich.eu>
+ *		based on BlackFin-AD193x driver by Barry Song <Barry.Song@analog.com>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ */
+
 #include <linux/module.h>
 #include <linux/platform_device.h>
+ 
 #include <sound/core.h>
 #include <sound/pcm.h>
 #include <sound/pcm_params.h>
@@ -10,34 +29,51 @@
 
 #include "../codecs/ad193x.h"
 
-static struct snd_soc_card bf5xx_ad193x;
-
+/* sound card init */
 static int snd_rpi_audiocard_init(struct snd_soc_pcm_runtime *rtd)
 {
-	struct snd_soc_dai *cpu_dai = rtd->cpu_dai;
-	struct snd_soc_dai *codec_dai = rtd->codec_dai;
-	int ret;
-
-	/* set the codec system clock for DAC and ADC */
-	ret = snd_soc_dai_set_sysclk(codec_dai, 0, 24576000, SND_SOC_CLOCK_IN);
-	if (ret < 0)
-		return ret;
-
-	/* set codec DAI slots, 8 channels, all channels are enabled */
-	ret = snd_soc_dai_set_tdm_slot(codec_dai, 0xFF, 0xFF, 8, 32);
-	if (ret < 0)
-		return ret;
-
-	ret = snd_soc_dai_set_tdm_slot(cpu_dai, 0xFF, 0xFF, 8, 32);
-	if (ret < 0)
-		return ret;
 
 	return 0;
 }
 
-#define SND_RPI_AUDIOCARD_DAIFMT (SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_NB_IF | \
-				SND_SOC_DAIFMT_CBM_CFM)
+/* set hw parameters */
+static int snd_rpi_raspidac3_hw_params(struct snd_pcm_substream *substream,
+				       struct snd_pcm_hw_params *params)
+{
+	struct snd_soc_pcm_runtime *rtd = substream->private_data;
+	struct snd_soc_dai *cpu_dai = rtd->cpu_dai;
 
+	unsigned int sample_bits =
+		snd_pcm_format_physical_width(params_format(params));
+
+	return snd_soc_dai_set_bclk_ratio(cpu_dai, sample_bits * 2);
+}
+
+/* startup */
+static int snd_rpi_raspidac3_startup(struct snd_pcm_substream *substream) {
+	struct snd_soc_pcm_runtime *rtd = substream->private_data;
+	struct snd_soc_codec *codec = rtd->codec;
+	snd_soc_update_bits(codec, PCM512x_GPIO_CONTROL_1, 0x08,0x08);
+	tpa6130a2_stereo_enable(codec, 1);
+	return 0;
+}
+
+/* shutdown */
+static void snd_rpi_raspidac3_shutdown(struct snd_pcm_substream *substream) {
+	struct snd_soc_pcm_runtime *rtd = substream->private_data;
+	struct snd_soc_codec *codec = rtd->codec;
+	snd_soc_update_bits(codec, PCM512x_GPIO_CONTROL_1, 0x08,0x00);
+	tpa6130a2_stereo_enable(codec, 0);
+}
+
+/* machine stream operations */
+static struct snd_soc_ops snd_rpi_raspidac3_ops = {
+	.hw_params = snd_rpi_raspidac3_hw_params,
+	.startup = snd_rpi_raspidac3_startup,
+	.shutdown = snd_rpi_raspidac3_shutdown,
+};
+
+/* interface setup */
 static struct snd_soc_dai_link snd_rpi_audiocard_dai[] = {
 	{
 		.name = "AudioCard",
@@ -46,11 +82,14 @@ static struct snd_soc_dai_link snd_rpi_audiocard_dai[] = {
 		.codec_dai_name ="ad193x-hifi",
 		.platform_name = "bcm2708-i2s.0",
 		.codec_name = "spi0.5",
-		.dai_fmt = SND_RPI_AUDIOCARD_DAIFMT,
+		.dai_fmt = SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_NB_IF | \
+				SND_SOC_DAIFMT_CBM_CFM,
+		.ops = &snd_rpi_raspidac3_ops,
 		.init = snd_rpi_audiocard_init,
 	},
 };
 
+/* audio machine driver */
 static struct snd_soc_card bf5xx_ad193x = {
 	.name = "snd_rpi_audiocard",
 	.owner = THIS_MODULE,
@@ -58,32 +97,30 @@ static struct snd_soc_card bf5xx_ad193x = {
 	.num_links = ARRAY_SIZE(snd_rpi_audiocard_dai),
 };
 
-static struct platform_device *bfxx_ad193x_snd_device;
-
-static int __init bf5xx_ad193x_init(void)
+/* sound card disconnect */
+static int snd_rpi_raspidac3_remove(struct platform_device *pdev)
 {
-	int ret;
-
-	bfxx_ad193x_snd_device = platform_device_alloc("soc-audio", -1);
-	if (!bfxx_ad193x_snd_device)
-		return -ENOMEM;
-
-	platform_set_drvdata(bfxx_ad193x_snd_device, &bf5xx_ad193x);
-	ret = platform_device_add(bfxx_ad193x_snd_device);
-
-	if (ret)
-		platform_device_put(bfxx_ad193x_snd_device);
-
-	return ret;
+	return snd_soc_unregister_card(&snd_rpi_raspidac3);
 }
 
-static void __exit bf5xx_ad193x_exit(void)
-{
-	platform_device_unregister(bfxx_ad193x_snd_device);
-}
+static const struct of_device_id raspidac3_of_match[] = {
+	{ .compatible = "jg,raspidacv3", },
+	{},
+};
+MODULE_DEVICE_TABLE(of, raspidac3_of_match);
 
-module_init(bf5xx_ad193x_init);
-module_exit(bf5xx_ad193x_exit);
+/* sound card platform driver */
+static struct platform_driver snd_rpi_raspidac3_driver = {
+	.driver = {
+		.name   = "snd-rpi-raspidac3",
+		.owner  = THIS_MODULE,
+		.of_match_table = raspidac3_of_match,
+	},
+	.probe          = snd_rpi_raspidac3_probe,
+	.remove         = snd_rpi_raspidac3_remove,
+};
+
+module_platform_driver(snd_rpi_raspidac3_driver);
 
 /* Module information */
 MODULE_AUTHOR("Barry Song");
