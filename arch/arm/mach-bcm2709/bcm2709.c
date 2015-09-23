@@ -755,6 +755,21 @@ static struct i2c_board_info __initdata snd_cs4271_superaudioboard_i2c_devices[]
 };
 #endif
 
+#if defined(CONFIG_SND_BCM2708_SOC_AUDIOCARD) || defined(CONFIG_SND_BCM2708_SOC_AUDIOCARD_MODULE)
+static struct platform_device snd_rpi_audiocard_device = {
+        .name = "snd-rpi-audiocard",
+        .id = 0,
+        .num_resources = 0,
+};
+
+/* TODO: Modify for SPI 
+static struct i2c_board_info __initdata snd_cs4271_superaudioboard_i2c_devices[] = {
+        {
+                I2C_BOARD_INFO("cs4271", 0x10)
+        },
+}; */
+#endif
+
 #if defined(CONFIG_SND_BCM2708_SOC_RPI_DAC) || defined(CONFIG_SND_BCM2708_SOC_RPI_DAC_MODULE)
 static struct platform_device snd_rpi_dac_device = {
         .name = "snd-rpi-dac",
@@ -993,6 +1008,12 @@ void __init bcm2709_init(void)
 #if defined(CONFIG_SND_BCM2708_SOC_SUPERAUDIOBOARD) || defined(CONFIG_SND_BCM2708_SOC_SUPERAUDIOBOARD_MODULE)
         bcm_register_device_dt(&snd_rpi_superaudioboard_device);
         i2c_register_board_info_dt(1, snd_cs4271_superaudioboard_i2c_devices, ARRAY_SIZE(snd_cs4271_superaudioboard_i2c_devices));
+#endif
+
+#if defined(CONFIG_SND_BCM2708_SOC_AUDIOCARD) || defined(CONFIG_SND_BCM2708_SOC_AUDIOCARD_MODULE)
+        bcm_register_device_dt(&snd_rpi_audiocard_device);
+        // TODO: Modify for SPI
+        //i2c_register_board_info_dt(1, snd_cs4271_superaudioboard_i2c_devices, ARRAY_SIZE(snd_cs4271_superaudioboard_i2c_devices));
 #endif
 
 #if defined(CONFIG_SND_BCM2708_SOC_RPI_DAC) || defined(CONFIG_SND_BCM2708_SOC_RPI_DAC_MODULE)
