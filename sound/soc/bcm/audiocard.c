@@ -71,6 +71,7 @@ static int snd_rpi_audiocard_init(struct snd_soc_pcm_runtime *rtd)
 static int snd_rpi_audiocard_hw_params(struct snd_pcm_substream *substream,
 				       struct snd_pcm_hw_params *params)
 {
+	int ret;
 	struct snd_soc_pcm_runtime *rtd = substream->private_data;
 	struct snd_soc_dai *cpu_dai = rtd->cpu_dai;
 	struct snd_soc_dai *codec_dai = rtd->codec_dai;
@@ -117,10 +118,8 @@ static struct snd_soc_ops snd_rpi_audiocard_ops = {
 };
 
 /* interface setup */
-#define AUDIOCARD_AD193X_DAIFMT (
-				SND_SOC_DAIFMT_I2S | \
-				SND_SOC_DAIFMT_IB_IF | \ //not sure, but should be supported by platform (took from Blackfin AD193x driver)
-				SND_SOC_DAIFMT_CBM_CFM) 
+//not sure, but should be supported by platform (took from Blackfin AD193x driver)
+#define AUDIOCARD_AD193X_DAIFMT ( SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_IB_IF | SND_SOC_DAIFMT_CBM_CFM )
 
 static struct snd_soc_dai_link snd_rpi_audiocard_dai[] = {
 	{
@@ -137,7 +136,7 @@ static struct snd_soc_dai_link snd_rpi_audiocard_dai[] = {
 };
 
 /* audio machine driver */
-static struct snd_soc_card bf5xx_ad193x = {
+static struct snd_soc_card snd_rpi_audiocard = {
 	.name = "snd_rpi_audiocard",
 	.dai_link = snd_rpi_audiocard_dai,
 	.num_links = ARRAY_SIZE(snd_rpi_audiocard_dai),
