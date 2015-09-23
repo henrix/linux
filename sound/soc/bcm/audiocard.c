@@ -47,6 +47,7 @@ static int snd_rpi_audiocard_init(struct snd_soc_pcm_runtime *rtd)
 		return ret;
 	}
 
+	/* think compatible DAI formats are chosen automatically by ASoC framework
 	// set codec DAI format 
 	// (ad193x driver only supports SND_SOC_DAIFMT_DSP_A and SND_SOC_DAIFMT_I2S with TDM)
 	ret = snd_soc_dai_set_fmt(codec_dai, SND_SOC_DAIFMT_I2S);
@@ -63,6 +64,7 @@ static int snd_rpi_audiocard_init(struct snd_soc_pcm_runtime *rtd)
 		dev_err(card->dev, "Unable to set cpu DAI format.");
 		return ret;
 	}
+	*/
 
 	return 0;
 }
@@ -89,7 +91,7 @@ static int snd_rpi_audiocard_hw_params(struct snd_pcm_substream *substream,
 	unsigned int sample_bits = snd_pcm_format_physical_width(params_format(params));
 
 	// bclk_ratio should be 256 (mclk / 48 KHz)
-	// blck ratio of CS4272 is always 64 in master => mode snd_soc_dai_set_bclk_ratio(cpu_dai, 64)
+	// blck ratio of CS4272 is always 64 in master mode => snd_soc_dai_set_bclk_ratio(cpu_dai, 64)
 	return snd_soc_dai_set_bclk_ratio(cpu_dai, sample_bits * 2); //why * 2? (took from raspidac3.c)
 }
 
