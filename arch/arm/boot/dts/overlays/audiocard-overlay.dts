@@ -1,4 +1,4 @@
-// Definitions for SuperAudioBoard
+// Definitions for AudioCard
 /dts-v1/;
 /plugin/;
 
@@ -53,7 +53,7 @@
 		};
 	};
     __overrides__ {
-        gpiopin = <&cs4271>,"reset-gpio:4",
+        gpiopin = <&ad913x>,"reset-gpio:4",
                   <&audiocard_pins>,"brcm,pins:0";
     };
 };

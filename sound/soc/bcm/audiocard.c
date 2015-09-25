@@ -90,7 +90,7 @@ static int snd_rpi_audiocard_hw_params(struct snd_pcm_substream *substream,
 
 	unsigned int sample_bits = snd_pcm_format_physical_width(params_format(params));
 
-	// bclk_ratio should be 256 (mclk / 48 KHz)
+	// bclk_ratio should be 256 (mclk / 48 kHz)
 	// blck ratio of CS4272 is always 64 in master mode => snd_soc_dai_set_bclk_ratio(cpu_dai, 64)
 	return snd_soc_dai_set_bclk_ratio(cpu_dai, sample_bits * 2); //why * 2? (took from raspidac3.c)
 }
