@@ -48,7 +48,7 @@
 				pinctrl-names = "default";
 				pinctrl-0 = <&audiocard_pins>;
 				spi-max-frequency = <32000000>;
-			}
+			};
 
 		};
 	};
