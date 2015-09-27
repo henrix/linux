@@ -367,6 +367,13 @@ const struct regmap_config ad193x_regmap_config = {
 };
 EXPORT_SYMBOL_GPL(ad193x_regmap_config);
 
+static const struct of_device_id ad193x_of_match[] = {
+	{ .compatible = "analog,ad1938", },
+	{ .compatible = "analog,ad1939", },
+	{ }
+};
+MODULE_DEVICE_TABLE(of, ad193x_of_match);
+
 int ad193x_probe(struct device *dev, struct regmap *regmap)
 {
 	struct ad193x_priv *ad193x;
