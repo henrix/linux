@@ -130,7 +130,7 @@ static struct snd_soc_dai_link snd_rpi_audiocard_dai[] = {
 		.cpu_dai_name = "bcm2708-i2s.0",
 		.codec_dai_name ="ad193x-hifi",
 		.platform_name = "bcm2708-i2s.0",
-		.codec_name = "spi0.5", //TODO: spi<bus #>.<CS #> => not sure for RPi
+		.codec_name = "spi0.0", //CS GPIO 8 
 		.dai_fmt = AUDIOCARD_AD193X_DAIFMT,
 		.ops = &snd_rpi_audiocard_ops,
 		.init = snd_rpi_audiocard_init,
