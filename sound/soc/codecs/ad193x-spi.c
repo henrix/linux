@@ -55,7 +55,7 @@ static struct spi_driver ad193x_spi_driver = {
 	},
 	.probe		= ad193x_spi_probe,
 	.remove		= ad193x_spi_remove,
-	.id_table	= 
+	.id_table	= ad193x_spi_id
 };
 module_spi_driver(ad193x_spi_driver);
 
