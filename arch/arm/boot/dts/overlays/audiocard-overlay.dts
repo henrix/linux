@@ -40,7 +40,7 @@
 			status = "okay";
 
 			ad913x: ad193x@0{
-				compatible = "analog,ad193x";
+				compatible = "analog,ad1938";
 				reg = <0>;
 				status = "okay";
 
@@ -52,7 +52,7 @@
 		};
 	};
     __overrides__ {
-        gpiopin = <&ad913x>,"reset-gpio:4",
-                  <&audiocard_pins>,"brcm,pins:0";
+        /*gpiopin = <&ad913x>,"reset-gpio:4",*/
+                 /* <&audiocard_pins>,"brcm,pins:0";*/
     };
 };
