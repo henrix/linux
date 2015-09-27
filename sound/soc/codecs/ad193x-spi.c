@@ -37,6 +37,7 @@ static struct spi_driver ad193x_spi_driver = {
 	.driver = {
 		.name	= "ad193x",
 		.owner	= THIS_MODULE,
+		.of_match_table = of_match_ptr(ad193x_dt_ids),
 	},
 	.probe		= ad193x_spi_probe,
 	.remove		= ad193x_spi_remove,

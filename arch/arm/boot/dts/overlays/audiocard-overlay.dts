@@ -43,7 +43,6 @@
 				compatible = "analog,ad193x";
 				reg = <0>;
 				status = "okay";
-				reset-gpio = <&gpio 26 1>; /* Pin 26, 1 = active low? */
 
 				pinctrl-names = "default";
 				pinctrl-0 = <&audiocard_pins>;
