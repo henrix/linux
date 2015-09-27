@@ -323,15 +323,6 @@ static struct snd_soc_dai_driver ad193x_dai = {
 	.ops = &ad193x_dai_ops,
 };
 
-#ifdef CONFIG_OF
-const struct of_device_id ad193x_dt_ids[] = {
-	{ .compatible = "analog,ad193x", },
-	{ }
-};
-MODULE_DEVICE_TABLE(of, ad193x_dt_ids);
-EXPORT_SYMBOL_GPL(ad193x_dt_ids);
-#endif
-
 static int ad193x_codec_probe(struct snd_soc_codec *codec)
 {
 	struct ad193x_priv *ad193x = snd_soc_codec_get_drvdata(codec);
