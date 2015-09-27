@@ -741,12 +741,11 @@ static struct platform_device snd_rpi_audiocard_device = {
         .num_resources = 0,
 };
 
-/* TODO: Modify for SPI 
-static struct i2c_board_info __initdata snd_cs4271_superaudioboard_i2c_devices[] = {
-        {
-                I2C_BOARD_INFO("cs4271", 0x10)
-        },
-}; */
+/*static struct spi_device snd_pcm5102a_codec_device = {
+        .name = "ad193x-codec",
+        .id = -1,
+        .num_resources = 0,
+};*/
 #endif
 
 #if defined(CONFIG_SND_BCM2708_SOC_RPI_DAC) || defined(CONFIG_SND_BCM2708_SOC_RPI_DAC_MODULE)

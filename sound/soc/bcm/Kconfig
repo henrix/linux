@@ -57,7 +57,7 @@ config SND_BCM2708_SOC_SUPERAUDIOBOARD
 config SND_BCM2708_SOC_AUDIOCARD
         tristate "Support for AudioCard"
         depends on SND_BCM2708_SOC_I2S || SND_BCM2835_SOC_I2S
-        select SND_SOC_CS4271_I2C ### TODO: Modify for SPI ###
+        select SND_SOC_AD193X_SPI
         help
          Say Y or M if you want to add support for AudioCard.
 
