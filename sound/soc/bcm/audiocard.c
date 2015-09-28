@@ -18,6 +18,7 @@
  * General Public License for more details.
  */
 
+#define DEBUG
 #include <linux/module.h>
 //#include <linux/platform_device.h>
 
@@ -38,7 +39,7 @@ static int snd_rpi_audiocard_init(struct snd_soc_pcm_runtime *rtd)
 	struct snd_soc_dai *codec_dai = rtd->codec_dai;
 	struct snd_soc_codec *codec = rtd->codec;
 	struct snd_soc_card *card = rtd->card;
-	struct ad193x_priv *ad193x = snd_soc_codec_get_drvdata(dai->codec);
+	struct ad193x_priv *ad193x = snd_soc_codec_get_drvdata(codec);
 
 	// set codec DAI slots, 8 channels, all channels are enabled
 	// codec driver ignores TX and RX mask

@@ -13,7 +13,7 @@
 
 struct device;
 
-extern const struct of_device_id ad193x_dt_ids[];
+//extern const struct of_device_id ad193x_dt_ids[];
 extern const struct regmap_config ad193x_regmap_config;
 int ad193x_probe(struct device *dev, struct regmap *regmap);
 
