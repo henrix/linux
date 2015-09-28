@@ -18,6 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
+#define DEBUG 1
+
 #ifndef BCM2708_I2S_H
 #define BCM2708_I2S_H
 

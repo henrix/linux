@@ -30,7 +30,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
  */
-
+#define DEBUG 1
+ 
 #include "bcm2708-i2s.h"
 
 #include <linux/init.h>

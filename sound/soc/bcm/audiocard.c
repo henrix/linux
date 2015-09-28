@@ -18,7 +18,7 @@
  * General Public License for more details.
  */
 
-#define DEBUG
+#define DEBUG 1
 #include <linux/module.h>
 //#include <linux/platform_device.h>
 

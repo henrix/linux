@@ -5,6 +5,7 @@
  *
  * Licensed under the GPL-2 or later.
  */
+#define DEBUG 1
 
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -327,7 +328,7 @@ static int ad193x_codec_probe(struct snd_soc_codec *codec)
 {
 	struct ad193x_priv *ad193x = snd_soc_codec_get_drvdata(codec);
 
-	/* default setting for ad193x */
+	/* modified setting for ad193x */
 
 	/* unmute dac channels */
 	regmap_write(ad193x->regmap, AD193X_DAC_CHNL_MUTE, 0x0);
@@ -336,11 +337,11 @@ static int ad193x_codec_probe(struct snd_soc_codec *codec)
 	/* dac in tdm mode */
 	regmap_write(ad193x->regmap, AD193X_DAC_CTRL0, 0x40);
 	/* high-pass filter enable */
-	regmap_write(ad193x->regmap, AD193X_ADC_CTRL0, 0x3);
-	/* sata delay=1, adc aux mode */
+	regmap_write(ad193x->regmap, AD193X_ADC_CTRL0, 0x03);
+	/* sata delay=1, adc tdm mode */
 	regmap_write(ad193x->regmap, AD193X_ADC_CTRL1, 0x43);
 	/* pll input: mclki/xi */
-	regmap_write(ad193x->regmap, AD193X_PLL_CLK_CTRL0, 0x99); /* mclk=24.576Mhz: 0x9D; mclk=12.288Mhz: 0x99 */
+	regmap_write(ad193x->regmap, AD193X_PLL_CLK_CTRL0, 0x80); /* mclk=24.576Mhz: 0x9D; mclk=12.288Mhz: 0x99 */
 	regmap_write(ad193x->regmap, AD193X_PLL_CLK_CTRL1, 0x04);
 
 	return 0;
