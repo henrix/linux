@@ -19,7 +19,7 @@
  */
 
 #include <linux/module.h>
-#include <linux/platform_device.h>
+//#include <linux/platform_device.h>
 
 #include <sound/core.h>
 #include <sound/pcm.h>
@@ -38,6 +38,7 @@ static int snd_rpi_audiocard_init(struct snd_soc_pcm_runtime *rtd)
 	struct snd_soc_dai *codec_dai = rtd->codec_dai;
 	struct snd_soc_codec *codec = rtd->codec;
 	struct snd_soc_card *card = rtd->card;
+	struct ad193x_priv *ad193x = snd_soc_codec_get_drvdata(dai->codec);
 
 	// set codec DAI slots, 8 channels, all channels are enabled
 	// codec driver ignores TX and RX mask
@@ -65,6 +66,9 @@ static int snd_rpi_audiocard_init(struct snd_soc_pcm_runtime *rtd)
 		return ret;
 	}
 	*/
+
+	/*regmap_update_bits(ad193x->regmap, AD193X_DAC_CTRL1,
+		AD193X_DAC_CHAN_MASK, channels << AD193X_DAC_CHAN_SHFT);*/
 
 	return 0;
 }
@@ -168,7 +172,7 @@ static int snd_rpi_audiocard_probe(struct platform_device *pdev)
 	ret = snd_soc_register_card(&snd_rpi_audiocard);
 	if (ret)
 		dev_err(&pdev->dev,
-			"snd_soc_register_card() failed: %d\n", ret);
+			"snd_soc_register_card() for ad1938 failed: %d\n", ret);
 
 	return ret;
 }
