@@ -41,32 +41,29 @@ static int snd_rpi_audiocard_init(struct snd_soc_pcm_runtime *rtd)
 	struct snd_soc_card *card = rtd->card;
 	struct ad193x_priv *ad193x = snd_soc_codec_get_drvdata(codec);
 
-	// set codec DAI slots, 8 channels, all channels are enabled
-	// codec driver ignores TX and RX mask
+	// set codec DAI slots, 2 channels, all channels are enabled
+	// codec driver ignores TX / RX mask and width
 	ret = snd_soc_dai_set_tdm_slot(codec_dai, 0xFF, 0xFF, 2, 32);
 	if (ret < 0){
 		dev_err(codec->dev, "Unable to set AD193x TDM slots.");
 		return ret;
 	}
 
-	/* think compatible DAI formats are chosen automatically by ASoC framework
-	// set codec DAI format 
 	// (ad193x driver only supports SND_SOC_DAIFMT_DSP_A and SND_SOC_DAIFMT_I2S with TDM)
-	ret = snd_soc_dai_set_fmt(codec_dai, SND_SOC_DAIFMT_I2S);
+	ret = snd_soc_dai_set_fmt(codec_dai, SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_NB_NF | SND_SOC_DAIFMT_CBM_CFM);
 	if (ret < 0){
 		dev_err(codec->dev, "Unable to set codec DAI format.");
 		return ret;
 	}
 
-	// set the cpu DAI (tdm with more than 2 channels not available in platform driver)
 	// cpu DAI only supports SND_SOC_DAIFMT_I2S (see bcm2835-i2s.c)
-	// => for multichannel support, platform driver may have to be modified
-	ret = snd_soc_dai_set_fmt(cpu_dai, SND_SOC_DAIFMT_I2S);
+	// TODO: for multichannel support, platform driver have to be modified
+	ret = snd_soc_dai_set_fmt(cpu_dai, SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_NB_NF | SND_SOC_DAIFMT_CBM_CFM);
 	if (ret < 0){
 		dev_err(card->dev, "Unable to set cpu DAI format.");
 		return ret;
 	}
-	*/
+	
 
 	/*regmap_update_bits(ad193x->regmap, AD193X_DAC_CTRL1,
 		AD193X_DAC_CHAN_MASK, channels << AD193X_DAC_CHAN_SHFT);*/
@@ -95,9 +92,7 @@ static int snd_rpi_audiocard_hw_params(struct snd_pcm_substream *substream,
 
 	unsigned int sample_bits = snd_pcm_format_physical_width(params_format(params));
 
-	// bclk_ratio should be 256 (mclk / 48 kHz)
-	// blck ratio of CS4272 is always 64 in master mode => snd_soc_dai_set_bclk_ratio(cpu_dai, 64)
-	return snd_soc_dai_set_bclk_ratio(cpu_dai, sample_bits * 2); //why * 2? (took from raspidac3.c)
+	return snd_soc_dai_set_bclk_ratio(cpu_dai, 64); //only for 2 channels!!! (see ad1938 datasheet)
 }
 
 /* startup */
@@ -126,7 +121,7 @@ static struct snd_soc_ops snd_rpi_audiocard_ops = {
 
 /* interface setup */
 //not sure, but should be supported by platform (took from Blackfin AD193x driver)
-#define AUDIOCARD_AD193X_DAIFMT ( SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_IB_IF | SND_SOC_DAIFMT_CBM_CFM )
+#define AUDIOCARD_AD193X_DAIFMT ( SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_NB_IF | SND_SOC_DAIFMT_CBM_CFM )
 
 static struct snd_soc_dai_link snd_rpi_audiocard_dai[] = {
 	{
