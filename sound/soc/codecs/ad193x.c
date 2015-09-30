@@ -169,11 +169,9 @@ static int ad193x_set_dai_fmt(struct snd_soc_dai *codec_dai,
 	switch (fmt & SND_SOC_DAIFMT_FORMAT_MASK) {
 	case SND_SOC_DAIFMT_I2S:
 		adc_serfmt |= AD193X_ADC_SERFMT_TDM;
-		dev_dbg(codec_dai->dev, "set_dai_fmt(): Set codec DAI format to i2s.\n");
 		break;
 	case SND_SOC_DAIFMT_DSP_A:
 		adc_serfmt |= AD193X_ADC_SERFMT_AUX;
-		dev_dbg(codec_dai->dev, "set_dai_fmt(): Set codec DAI format to dsp.\n");
 		break;
 	default:
 		return -EINVAL;
@@ -181,24 +179,20 @@ static int ad193x_set_dai_fmt(struct snd_soc_dai *codec_dai,
 
 	switch (fmt & SND_SOC_DAIFMT_INV_MASK) {
 	case SND_SOC_DAIFMT_NB_NF: /* normal bit clock + frame */
-		dev_dbg(codec_dai->dev, "set_dai_fmt(): Set codec DAI format to normaal bit clock + frame.\n");
 		break;
 	case SND_SOC_DAIFMT_NB_IF: /* normal bclk + invert frm */
 		adc_fmt |= AD193X_ADC_LEFT_HIGH;
 		dac_fmt |= AD193X_DAC_LEFT_HIGH;
-		dev_dbg(codec_dai->dev, "set_dai_fmt(): Set codec DAI format to normal bclk + invert frm.\n");
 		break;
 	case SND_SOC_DAIFMT_IB_NF: /* invert bclk + normal frm */
 		adc_fmt |= AD193X_ADC_BCLK_INV;
 		dac_fmt |= AD193X_DAC_BCLK_INV;
-		dev_dbg(codec_dai->dev, "set_dai_fmt(): Set codec DAI format to invert bclk + normal frm.\n");
 		break;
 	case SND_SOC_DAIFMT_IB_IF: /* invert bclk + frm */
 		adc_fmt |= AD193X_ADC_LEFT_HIGH;
 		adc_fmt |= AD193X_ADC_BCLK_INV;
 		dac_fmt |= AD193X_DAC_LEFT_HIGH;
 		dac_fmt |= AD193X_DAC_BCLK_INV;
-		dev_dbg(codec_dai->dev, "set_dai_fmt(): Set codec DAI format to invert bclk + frm.\n");
 		break;
 	default:
 		return -EINVAL;
@@ -210,21 +204,17 @@ static int ad193x_set_dai_fmt(struct snd_soc_dai *codec_dai,
 		//adc_fmt |= AD193X_ADC_BCLK_MASTER;
 		dac_fmt |= AD193X_DAC_LCR_MASTER;
 		dac_fmt |= AD193X_DAC_BCLK_MASTER;
-		dev_dbg(codec_dai->dev, "set_dai_fmt(): Set codec DAI format to codec clk & frm master.\n");
 		break;
 	case SND_SOC_DAIFMT_CBS_CFM: /* codec clk slave & frm master */
 		adc_fmt |= AD193X_ADC_LCR_MASTER;
 		dac_fmt |= AD193X_DAC_LCR_MASTER;
-		dev_dbg(codec_dai->dev, "set_dai_fmt(): Set codec DAI format to codec clk slave & frm master.\n");
 		break;
 	case SND_SOC_DAIFMT_CBM_CFS: /* codec clk master & frame slave */
 		adc_fmt |= AD193X_ADC_BCLK_MASTER;
 		dac_fmt |= AD193X_DAC_BCLK_MASTER;
-		dev_dbg(codec_dai->dev, "set_dai_fmt(): Set codec DAI format to codec clk master & frame slave.\n");
 		break;
 	case SND_SOC_DAIFMT_CBS_CFS: /* codec clk & frm slave */
 		break;
-		dev_dbg(codec_dai->dev, "set_dai_fmt(): Set codec DAI format to codec clk & frm slave.\n");
 	default:
 		return -EINVAL;
 	}
@@ -306,11 +296,6 @@ static int ad193x_hw_params(struct snd_pcm_substream *substream,
 	regmap_update_bits(ad193x->regmap, AD193X_ADC_CTRL1,
 			    AD193X_ADC_WORD_LEN_MASK, word_len);
 
-	/*while(1){
-		regmap_update_bits(ad193x->regmap, AD193X_ADC_CTRL1,
-			    AD193X_ADC_WORD_LEN_MASK, word_len);
-	}*/
-
 	return 0;
 }
 
@@ -349,50 +334,26 @@ static int ad193x_codec_probe(struct snd_soc_codec *codec)
 	struct ad193x_priv *ad193x = snd_soc_codec_get_drvdata(codec);
 	int ret;
 
-	//TODO: Read all registers and print to dmesg => KERNEL PANIC!!!
-	/*for (i=0; i<=16; i++){
-		ret = regmap_read(ad193x->regmap, i, 0x00);
-		dev_dbg(codec->dev, "AD193X register %d:\t%d\n", i, ret);
-	}*/
-
 	/* modified setting for ad193x */
 	dev_dbg(codec->dev, "codec_probe() called to set up registers.\n");
 
 	/* pll input: mclki/xi */
 	ret = regmap_write(ad193x->regmap, AD193X_PLL_CLK_CTRL0, 0x80);
-	if (ret < 0)
-		dev_dbg(codec->dev, "regmap_write AD193X_PLL_CLK_CTRL0 failed: %d", ret);
 	ret = regmap_write(ad193x->regmap, AD193X_PLL_CLK_CTRL1, 0x00);
-	if (ret < 0)
-		dev_dbg(codec->dev, "regmap_write AD193X_PLL_CLK_CTRL1 failed: %d", ret);
 	/* dac in tdm mode */
 	ret = regmap_write(ad193x->regmap, AD193X_DAC_CTRL0, AD193X_DAC_SERFMT_TDM);
-	if (ret < 0)
-		dev_dbg(codec->dev, "regmap_write AD193X_DAC_CTRL0 failed: %d", ret); 
 	/* DAC bclk and lcr master, 64 bclk per frame */
-	ret = regmap_write(ad193x->regmap, AD193X_DAC_CTRL1, AD193X_DAC_LCR_MASTER | AD193X_DAC_BCLK_MASTER); //Modified
-	if (ret < 0)
-		dev_dbg(codec->dev, "regmap_write AD193X_DAC_CTRL1 failed: %d", ret);
+	ret = regmap_write(ad193x->regmap, AD193X_DAC_CTRL1, AD193X_DAC_LCR_MASTER | AD193X_DAC_BCLK_MASTER);
 	/* de-emphasis: 48kHz, powedown dac */
 	ret = regmap_write(ad193x->regmap, AD193X_DAC_CTRL2, 0x18); 
-	if (ret < 0)
-		dev_dbg(codec->dev, "regmap_write AD193X_DAC_CTRL2 failed: %d", ret);
 	/* unmute dac channels */
 	ret = regmap_write(ad193x->regmap, AD193X_DAC_CHNL_MUTE, 0x0);
-	if (ret < 0)
-		dev_dbg(codec->dev, "regmap_write AD193X_DAC_CHNL_MUTE failed: %d", ret);
 	/* high-pass filter enable */
 	ret = regmap_write(ad193x->regmap, AD193X_ADC_CTRL0, 0x00);
-	if (ret < 0)
-		dev_dbg(codec->dev, "regmap_write AD193X_ADC_CTRL0 failed: %d", ret);
 	/* sata delay=1, adc tdm mode */
 	ret = regmap_write(ad193x->regmap, AD193X_ADC_CTRL1, AD193X_ADC_SERFMT_TDM | 0x03);
-	if (ret < 0)
-		dev_dbg(codec->dev, "regmap_write AD193X_ADC_CTRL1 failed: %d", ret);
 	/**/
 	ret = regmap_write(ad193x->regmap, AD193X_ADC_CTRL2, 0x00);
-	if (ret < 0)
-		dev_dbg(codec->dev, "regmap_write AD193X_ADC_CTRL2 failed: %d", ret);
 
 	return 0;
 }
@@ -421,8 +382,6 @@ EXPORT_SYMBOL_GPL(ad193x_regmap_config);
 int ad193x_probe(struct device *dev, struct regmap *regmap)
 {
 	struct ad193x_priv *ad193x;
-
-	dev_dbg(dev, "probe() called.\n");
 
 	if (IS_ERR(regmap))
 		return PTR_ERR(regmap);

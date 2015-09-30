@@ -41,32 +41,28 @@ static int snd_rpi_audiocard_init(struct snd_soc_pcm_runtime *rtd)
 	struct snd_soc_card *card = rtd->card;
 	struct ad193x_priv *ad193x = snd_soc_codec_get_drvdata(codec);
 
-	// set codec DAI slots, 2 channels, all channels are enabled
+	// set codec DAI slots, 8 channels, all channels are enabled
 	// codec driver ignores TX / RX mask and width
-	ret = snd_soc_dai_set_tdm_slot(codec_dai, 0xFF, 0xFF, 2, 32);
+	ret = snd_soc_dai_set_tdm_slot(codec_dai, 0xFF, 0xFF, 8, 32);
 	if (ret < 0){
 		dev_err(codec->dev, "Unable to set AD193x TDM slots.");
 		return ret;
 	}
 
 	// (ad193x driver only supports SND_SOC_DAIFMT_DSP_A and SND_SOC_DAIFMT_I2S with TDM)
-	ret = snd_soc_dai_set_fmt(codec_dai, SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_NB_NF | SND_SOC_DAIFMT_CBM_CFM);
+	/*ret = snd_soc_dai_set_fmt(codec_dai, SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_NB_IF | SND_SOC_DAIFMT_CBM_CFM);
 	if (ret < 0){
 		dev_err(codec->dev, "Unable to set codec DAI format.");
 		return ret;
-	}
+	}*/
 
 	// cpu DAI only supports SND_SOC_DAIFMT_I2S (see bcm2835-i2s.c)
 	// TODO: for multichannel support, platform driver have to be modified
-	ret = snd_soc_dai_set_fmt(cpu_dai, SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_NB_NF | SND_SOC_DAIFMT_CBM_CFM);
+	/*ret = snd_soc_dai_set_fmt(cpu_dai, SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_NB_NF | SND_SOC_DAIFMT_CBM_CFM);
 	if (ret < 0){
 		dev_err(card->dev, "Unable to set cpu DAI format.");
 		return ret;
-	}
-	
-
-	/*regmap_update_bits(ad193x->regmap, AD193X_DAC_CTRL1,
-		AD193X_DAC_CHAN_MASK, channels << AD193X_DAC_CHAN_SHFT);*/
+	}*/
 
 	return 0;
 }
@@ -91,16 +87,16 @@ static int snd_rpi_audiocard_hw_params(struct snd_pcm_substream *substream,
 	}
 
 	unsigned int sample_bits = snd_pcm_format_physical_width(params_format(params));
+	dev_dbg(codec->dev, "audiocard hwparams(): sample_bits from params: %d\n", sample_bits);
 
-	return snd_soc_dai_set_bclk_ratio(cpu_dai, 64); //only for 2 channels!!! (see ad1938 datasheet)
+	return snd_soc_dai_set_bclk_ratio(cpu_dai, 256); //64 per frame => only for 2 channels!!! (see ad1938 datasheet) => original sample_bits * 2
 }
 
 /* startup */
 static int snd_rpi_audiocard_startup(struct snd_pcm_substream *substream) {
 	struct snd_soc_pcm_runtime *rtd = substream->private_data;
 	struct snd_soc_codec *codec = rtd->codec;
-	//snd_soc_update_bits(codec, PCM512x_GPIO_CONTROL_1, 0x08,0x08);
-	//tpa6130a2_stereo_enable(codec, 1);
+
 	return 0;
 }
 
@@ -108,8 +104,6 @@ static int snd_rpi_audiocard_startup(struct snd_pcm_substream *substream) {
 static void snd_rpi_audiocard_shutdown(struct snd_pcm_substream *substream) {
 	struct snd_soc_pcm_runtime *rtd = substream->private_data;
 	struct snd_soc_codec *codec = rtd->codec;
-	//snd_soc_update_bits(codec, PCM512x_GPIO_CONTROL_1, 0x08,0x00);
-	//tpa6130a2_stereo_enable(codec, 0);
 }
 
 /* machine stream operations */
@@ -120,7 +114,6 @@ static struct snd_soc_ops snd_rpi_audiocard_ops = {
 };
 
 /* interface setup */
-//not sure, but should be supported by platform (took from Blackfin AD193x driver)
 #define AUDIOCARD_AD193X_DAIFMT ( SND_SOC_DAIFMT_I2S | SND_SOC_DAIFMT_NB_IF | SND_SOC_DAIFMT_CBM_CFM )
 
 static struct snd_soc_dai_link snd_rpi_audiocard_dai[] = {
