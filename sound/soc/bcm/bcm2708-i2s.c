@@ -530,7 +530,7 @@ static int bcm2708_i2s_hw_params(struct snd_pcm_substream *substream,
 	}
 
 	ch1pos = data_delay;
-	ch2pos = bclk_ratio / 2 + data_delay;
+	ch2pos = bclk_ratio / 8 + data_delay; //For 8 channels to match tdm slot 1 (instead of 2)
 
 	switch (params_channels(params)) {
 	case 2:

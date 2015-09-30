@@ -89,7 +89,7 @@ static int snd_rpi_audiocard_hw_params(struct snd_pcm_substream *substream,
 	unsigned int sample_bits = snd_pcm_format_physical_width(params_format(params));
 	dev_dbg(codec->dev, "audiocard hwparams(): sample_bits from params: %d\n", sample_bits);
 
-	return snd_soc_dai_set_bclk_ratio(cpu_dai, 256); //64 per frame => only for 2 channels!!! (see ad1938 datasheet) => original sample_bits * 2
+	return snd_soc_dai_set_bclk_ratio(cpu_dai, 256); //256 for 8 channels (see ad1938 datasheet)
 }
 
 /* startup */
