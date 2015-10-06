@@ -43,7 +43,7 @@ static int snd_rpi_audiocard_init(struct snd_soc_pcm_runtime *rtd)
 
 	// set codec DAI slots, 8 channels, all channels are enabled
 	// codec driver ignores TX / RX mask and width
-	ret = snd_soc_dai_set_tdm_slot(codec_dai, 0xFF, 0xFF, 8, 32);
+	ret = snd_soc_dai_set_tdm_slot(codec_dai, 0xFF, 0xFF, 2, 32);
 	if (ret < 0){
 		dev_err(codec->dev, "Unable to set AD193x TDM slots.");
 		return ret;
@@ -89,7 +89,7 @@ static int snd_rpi_audiocard_hw_params(struct snd_pcm_substream *substream,
 	unsigned int sample_bits = snd_pcm_format_physical_width(params_format(params));
 	dev_dbg(codec->dev, "audiocard hwparams(): sample_bits from params: %d\n", sample_bits);
 
-	return snd_soc_dai_set_bclk_ratio(cpu_dai, 256); //256 for 8 channels (see ad1938 datasheet)
+	return snd_soc_dai_set_bclk_ratio(cpu_dai, sample_bits*2); //64 Bit for 2 channels
 }
 
 /* startup */

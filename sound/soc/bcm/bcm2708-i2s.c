@@ -482,10 +482,10 @@ static int bcm2708_i2s_hw_params(struct snd_pcm_substream *substream,
 			bclk_ratio = 2 * data_length;
 		}
 
-		target_frequency = sampling_rate * bclk_ratio;
+		target_frequency = sampling_rate * bclk_ratio; // = 12,288MHz
 
-		clk_src = BCM2708_CLK_SRC_PLLD;
-		mash = BCM2708_CLK_MASH_1;
+		clk_src = BCM2708_CLK_SRC_PLLD; // = 500000000
+		mash = BCM2708_CLK_MASH_1; // = 1 (enum)
 
 		dividend = bcm2708_clk_freq[clk_src];
 		dividend <<= BCM2708_CLK_SHIFT;
@@ -530,7 +530,7 @@ static int bcm2708_i2s_hw_params(struct snd_pcm_substream *substream,
 	}
 
 	ch1pos = data_delay;
-	ch2pos = bclk_ratio / 8 + data_delay; //For 8 channels to match tdm slot 1 (instead of 2)
+	ch2pos = bclk_ratio / 2 + data_delay; //For 8 channels to match tdm slot 1 => 8
 
 	switch (params_channels(params)) {
 	case 2:
@@ -882,7 +882,7 @@ static struct snd_pcm_hardware bcm2708_pcm_hardware = {
 				  SNDRV_PCM_FMTBIT_S24_LE |
 				  SNDRV_PCM_FMTBIT_S32_LE,
 	.period_bytes_min	= 32,
-	.period_bytes_max	= 64 * PAGE_SIZE,
+	.period_bytes_max	= 64 * PAGE_SIZE, //PAGE_SIZE = 4096
 	.periods_min		= 2,
 	.periods_max		= 255,
 	.buffer_bytes_max	= 128 * PAGE_SIZE,
