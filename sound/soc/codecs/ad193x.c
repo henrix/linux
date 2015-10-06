@@ -145,7 +145,7 @@ static int ad193x_set_tdm_slot(struct snd_soc_dai *dai, unsigned int tx_mask,
 	default:
 		return -EINVAL;
 	}
-	dev_dbg(dai->dev, "set_tdm_slot(): Set number tdm slots to %d\n", slots);
+	dev_dbg(dai->dev, "ad193x_set_tdm_slot(): Set number tdm slots to %d\n", slots);
 
 	regmap_update_bits(ad193x->regmap, AD193X_DAC_CTRL1,
 		AD193X_DAC_CHAN_MASK, channels << AD193X_DAC_CHAN_SHFT);
@@ -236,7 +236,7 @@ static int ad193x_set_dai_sysclk(struct snd_soc_dai *codec_dai,
 	struct snd_soc_codec *codec = codec_dai->codec;
 	struct ad193x_priv *ad193x = snd_soc_codec_get_drvdata(codec);
 
-	dev_dbg(codec_dai->dev, "set_dai_sysclk(): Set codec DAI sysclk to %d.\n", freq);
+	dev_dbg(codec_dai->dev, "ad193x_set_dai_sysclk(): Set codec DAI sysclk to %d.\n", freq);
 	switch (freq) {
 	case 12288000:
 	case 18432000:
@@ -252,7 +252,7 @@ static int ad193x_hw_params(struct snd_pcm_substream *substream,
 		struct snd_pcm_hw_params *params,
 		struct snd_soc_dai *dai)
 {
-	int word_len = 0, master_rate = 0, i, ret;
+	int word_len = 0, master_rate = 0, sample_rate = 0, i, ret;
 	struct snd_soc_codec *codec = dai->codec;
 	struct ad193x_priv *ad193x = snd_soc_codec_get_drvdata(codec);
 
@@ -269,7 +269,24 @@ static int ad193x_hw_params(struct snd_pcm_substream *substream,
 		word_len = 0;
 		break;
 	}
-	dev_dbg(dai->dev, "hw_params(): Set bit size to %d.\n", params_width(params));
+	dev_dbg(dai->dev, "ad193x_hw_params(): Set bit size to %d.\n", params_width(params));
+
+	/* sample rate */
+	dev_dbg(dai->dev, "ad193x_hw_params(): Set sample rate to %d.\n", params_rate(params));
+	switch(params_rate(params)){
+	case 48000:
+		sample_rate = 0;
+		break;
+	case 96000:
+		sample_rate = 0x01;
+		break;
+	case 192000:
+		sample_rate = 0x02;
+		break;
+	default:
+		sample_rate = 0; //48 kHz
+		break;
+	}
 
 	switch (ad193x->sysclk) {
 	case 12288000:
@@ -285,7 +302,10 @@ static int ad193x_hw_params(struct snd_pcm_substream *substream,
 		master_rate = AD193X_PLL_INPUT_768;
 		break;
 	}
-	dev_dbg(dai->dev, "hw_params(): Set sysclk to %d.\n", ad193x->sysclk);
+	dev_dbg(dai->dev, "ad193x_hw_params(): Set sysclk to %d.\n", ad193x->sysclk);
+
+	regmap_update_bits(ad193x->regmap, AD193X_DAC_CTRL1, 0x06, sample_rate << 1);
+	regmap_update_bits(ad193x->regmap, AD193X_ADC_CTRL0, 0xC0, sample_rate << 5);
 
 	regmap_update_bits(ad193x->regmap, AD193X_PLL_CLK_CTRL0,
 			    AD193X_PLL_INPUT_MASK, master_rate);
@@ -320,7 +340,7 @@ static struct snd_soc_dai_driver ad193x_dai = {
 		.stream_name = "Playback",
 		.channels_min = 2,
 		.channels_max = 8,
-		.rates = SNDRV_PCM_RATE_48000,
+		.rates = SNDRV_PCM_RATE_48000 | SNDRV_PCM_RATE_96000 | SNDRV_PCM_RATE_192000,
 		.formats = SNDRV_PCM_FMTBIT_S32_LE | SNDRV_PCM_FMTBIT_S16_LE |
 			SNDRV_PCM_FMTBIT_S20_3LE | SNDRV_PCM_FMTBIT_S24_LE,
 	},
@@ -328,7 +348,7 @@ static struct snd_soc_dai_driver ad193x_dai = {
 		.stream_name = "Capture",
 		.channels_min = 2,
 		.channels_max = 4,
-		.rates = SNDRV_PCM_RATE_48000,
+		.rates = SNDRV_PCM_RATE_48000 | SNDRV_PCM_RATE_96000 | SNDRV_PCM_RATE_192000,
 		.formats = SNDRV_PCM_FMTBIT_S32_LE | SNDRV_PCM_FMTBIT_S16_LE |
 			SNDRV_PCM_FMTBIT_S20_3LE | SNDRV_PCM_FMTBIT_S24_LE,
 	},
@@ -341,7 +361,7 @@ static int ad193x_codec_probe(struct snd_soc_codec *codec)
 	int ret;
 
 	/* modified setting for ad193x */
-	dev_dbg(codec->dev, "codec_probe() called to set up registers.\n");
+	dev_dbg(codec->dev, "ad193x_codec_probe() called to set up registers.\n");
 
 	/* pll input: mclki/xi */
 	ret = regmap_write(ad193x->regmap, AD193X_PLL_CLK_CTRL0, 0x80);
