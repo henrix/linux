@@ -379,7 +379,7 @@ static int ad193x_codec_probe(struct snd_soc_codec *codec)
 	/* sata delay=1, adc tdm mode */
 	ret = regmap_write(ad193x->regmap, AD193X_ADC_CTRL1, AD193X_ADC_SERFMT_TDM | 0x03);
 	/**/
-	ret = regmap_write(ad193x->regmap, AD193X_ADC_CTRL2, 0x00);
+	ret = regmap_write(ad193x->regmap, AD193X_ADC_CTRL2, 0x00); // 0x02 => 256 bclks per frame
 
 	return 0;
 }
