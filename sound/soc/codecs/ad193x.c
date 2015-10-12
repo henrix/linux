@@ -269,19 +269,19 @@ static int ad193x_hw_params(struct snd_pcm_substream *substream,
 		word_len = 0;
 		break;
 	}
-	dev_dbg(dai->dev, "ad193x_hw_params(): Set bit size to %d.\n", params_width(params));
+	//dev_dbg(dai->dev, "ad193x_hw_params(): Set bit size to %d.\n", params_width(params));
 
 	/* sample rate */
-	dev_dbg(dai->dev, "ad193x_hw_params(): Set sample rate to %d.\n", params_rate(params));
+	//dev_dbg(dai->dev, "ad193x_hw_params(): Set sample rate to %d.\n", params_rate(params));
 	switch(params_rate(params)){
 	case 48000:
 		sample_rate = 0;
 		break;
 	case 96000:
-		sample_rate = 0x01;
+		sample_rate = 1;
 		break;
 	case 192000:
-		sample_rate = 0x02;
+		sample_rate = 2;
 		break;
 	default:
 		sample_rate = 0; //48 kHz
@@ -302,10 +302,10 @@ static int ad193x_hw_params(struct snd_pcm_substream *substream,
 		master_rate = AD193X_PLL_INPUT_768;
 		break;
 	}
-	dev_dbg(dai->dev, "ad193x_hw_params(): Set sysclk to %d.\n", ad193x->sysclk);
+	//dev_dbg(dai->dev, "ad193x_hw_params(): Set sysclk to %d.\n", ad193x->sysclk);
 
-	regmap_update_bits(ad193x->regmap, AD193X_DAC_CTRL1, 0x06, sample_rate << 1);
-	regmap_update_bits(ad193x->regmap, AD193X_ADC_CTRL0, 0xC0, sample_rate << 5);
+	regmap_update_bits(ad193x->regmap, AD193X_DAC_CTRL0, 0x06, sample_rate << 1);
+	regmap_update_bits(ad193x->regmap, AD193X_ADC_CTRL0, 0xC0, sample_rate << 6);
 
 	regmap_update_bits(ad193x->regmap, AD193X_PLL_CLK_CTRL0,
 			    AD193X_PLL_INPUT_MASK, master_rate);
